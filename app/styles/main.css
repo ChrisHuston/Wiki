@@ -1,0 +1,197 @@
+/* Space out content a bit */
+body { padding-top: 60px; }
+
+.k-logo {
+    max-height: 40px;
+    margin-right: 15px;
+    margin-top: 5px;
+    margin-bottom: 0;
+    padding: 0;
+}
+
+.page-sidebar {
+    position: fixed;
+    top: 80px;
+    bottom:10px;
+    left:10px;
+}
+
+@media (max-width: 768px) {
+    .page-sidebar {
+        position: inherit;
+    }
+}
+
+.accordion-toggle {
+    cursor: pointer;
+}
+
+.show-cursor {
+    cursor: pointer;
+}
+
+.headings {
+    margin-left: 8px;
+    padding-left: 0;
+}
+
+.menu-btn {
+    margin-top: 8px;
+    margin-left: 5px;
+}
+
+.statsGridStyle {
+    width:100%;
+    height: 400px;
+    margin-bottom: 10px;
+    margin-top: 0;
+}
+
+.pagesGridStyle {
+    width:100%;
+    height: 500px;
+    margin-bottom: 10px;
+    margin-top: 0;
+}
+
+.numericCol {
+    text-align: right;
+}
+
+.page-admin {
+    margin-top: 8px;
+}
+
+.heading-admin {
+    margin-left: 25px;
+    margin-top: 8px;
+}
+
+.admin-input {
+     width:320px !important;
+}
+
+.prev-input {
+    width:70px !important;
+}
+
+.wiki-heading {
+    background-color: #ededed;
+    display: block;
+    padding: 5px;
+}
+
+.user-name {
+    padding-left: 25px;
+}
+
+.dropdown-menu {
+    margin-top: -18px;
+}
+
+.dropdown-menu ul{
+    text-align: left;
+}
+
+.dropdown-menu li{
+    text-align: left;
+}
+
+.page-menu {
+    margin-left:18px;
+}
+
+.section-menu {
+    margin-left:100px;
+}
+
+.wiki-select {
+    height:30px;
+    padding: 6px 12px;
+    font-size:14px;
+    line-height: 1.43;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: inset 0 1px 1px rgba(120,120,120,0.5);
+    transition: border-color ease-in-out .15s box-shadow ease-in-out .15s;
+}
+
+.search-field {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    display: inline-block;
+}
+
+.clear-search {
+    position: absolute;
+    display: block;
+    top: 5px;
+    right: 15px;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.likes-low {
+    background-color: #00AA00;
+}
+
+.likes-mid {
+    background-color: #AA0000;
+}
+
+.likes-high {
+    background-color: #0000AA;
+}
+
+.post-comment {
+    background-color: #fefedc;
+    margin-left: 25px;
+    margin-bottom: 3px;
+    padding: 5px;
+}
+
+.toggle-view {
+    color:red;
+}
+
+.new-posts-badge {
+    top:10px;
+    right:5px;
+    position: absolute;
+}
+
+.vjs-menu-content {
+    overflow: visible !important;
+}
+
+.list-group-item {
+    padding-right: 30px;
+}
+
+.page-list-item {
+    word-wrap: break-word;
+}
+
+.post-block {
+    border-bottom: 1px solid #eeeeee;
+    margin-bottom: 1.5em;
+}
+
+.c-header {
+    text-align: center;
+    white-space: normal;
+    word-wrap: normal;
+}
+
+.micro-user-name {
+    margin-bottom:10px;
+    margin-left: 40px;
+    margin-top: -10px;
+}
+
+

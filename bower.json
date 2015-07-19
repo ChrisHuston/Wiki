@@ -1,0 +1,20 @@
+{
+  "name": "Wiki",
+  "version": "0.4.0",
+  "dependencies": {
+    "angular": "~1.4",
+    "angular-sanitize": "~1.4",
+    "angular-touch": "~1.4",
+    "angular-route": "~1.4",
+    "angular-bootstrap": "~0.13",
+    "bootstrap": "~3",
+    "font-awesome": "~4",
+      "underscore": "latest",
+      "d3": "latest",
+    "jquery": "~2",
+    "jquery-ui": "~1.11.1",
+    "angular-ui-grid": "~3",
+    "moment": "~2",
+    "tinymce": "~4"
+  }
+}

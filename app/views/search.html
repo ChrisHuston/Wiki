@@ -1,0 +1,14 @@
+<div ng-show="search.res.length==0"  class="alert alert-danger"><h4>No search results found.</h4></div>
+<div ng-repeat="post in search.res">
+    <div ng-repeat="v in post.versions | filter:{version:post.version}">
+        <h4 class="wiki-heading"><a href="" ng-click="gotoPost(post)"><strong>{{post.page_name}}</strong>: {{post.heading_name}}</a></h4>
+        <div ng-bind-html="v.post_txt"></div>
+        <div class="text-muted user-name"><span ng-show="post.versions.length===1">{{v.user_name}},</span> <select class="wiki-select" ng-hide="post.versions.length===1" ng-model="post.version" ng-options="ver.version as ver.label for ver in post.versions"></select> {{v.edit_date | date:"MMM dd, ''''yy HH:mm"}}
+        </div>
+    </div>
+    <div ng-repeat="c in post.comments" class="post-comment">
+        <div ng-bind-html="c.comment_txt" id="c_{{c.comment_id}}"></div>
+        <div class="text-muted comment-src">{{c.commentor}}, {{c.comment_date | date:"MMM dd, ''''yy HH:mm"}}
+        </div>
+    </div>
+</div>

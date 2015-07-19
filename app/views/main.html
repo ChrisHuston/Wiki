@@ -1,0 +1,298 @@
+<div class="alert alert-danger" ng-show="user.loginError">
+    <p>Cookies must be enabled for this application to run in Canvas</p>
+    <p>For Chrome:</p>
+    <ol>
+        <li>Click the menu button (three bars icon) in the right in the top menu and select <strong>Settings</strong></li>
+        <li>Click the <strong>Show advanced settings...</strong> link at the bottom.</li>
+        <li>Click the <strong>Content settings</strong> button under Privacy</li>
+        <li>Un-check the <strong>Block third-party cookies and site data</strong></li>
+        <li>OR click Manage exceptions and add "www.kblocks.com" and set to Allow</li>
+    </ol>
+    <p>For Firefox:</p>
+    <ol>
+        <li>Click the menu button (three bars icon) in the right in the top menu and select Preferences</li>
+        <li>Select the <strong>Privacy</strong> panel.</li>
+        <li>Set <strong>Firefox will:</strong> to <strong>Use custom settings for history</strong>.</li>
+        <li>Set <strong>Accept third-party cookies</strong> to <strong>From Visited</strong> or <strong>Always</strong></li>
+    </ol>
+    <p>For Safari:</p>
+    <ol>
+        <li>Click Safari in the top menu and select Preferences</li>
+        <li>Select the <strong>Privacy</strong> tab</li>
+        <li>Select <strong>Never</strong> for <strong>Block cookies and other website data</strong></li>
+        <li>Reload your browser</li>
+    </ol>
+</div>
+<div class="col-sm-4 col-md-3 col-lg-3" style="margin-bottom: 30px;">
+    <div ng-bind-html="wiki.description"></div>
+    <div class="list-group">
+        <a href="" ng-click="selectPage(page)" ng-repeat="page in wiki.pages" class="list-group-item" ng-class="{active:page.is_open}">
+            <span class="page-list-item">{{page.page_name}}</span><span ng-class="setNewPostBadge(page.new_posts)" class="badge new-posts-badge">{{page.new_posts}}</span>
+        </a>
+    </div>
+    <label><input type="checkbox" ng-change="toggleSubscribed()" ng-true-value="'1'" ng-false-value="'0'" ng-model="wiki.subscribed"> Subscribe <i class="fa fa-envelope-o"></i></label>
+    <label><input type="checkbox" ng-change="toggleNewPosts()" ng-true-value="1" ng-false-value="0" ng-model="wiki.new_only"> View New Posts Only <i class="fa fa-star" style="color:darkorange;"></i></label>
+    <label><input type="checkbox" ng-change="toggleMicroPosts()" ng-true-value="1" ng-false-value="0" ng-model="wiki.show_micro_posts"> Show Micro Posts</label>
+    <button ng-show="user.user_id != '0' && (wiki.add_pages || user.priv_level>1)" class="btn btn-default btn-block" style="margin-top: 5px;" ng-click="showPageModal()">Add Page</button>
+    <button ng-show="current.currentPage.page_id!=0 && (wiki.add_sections || user.priv_level>1)" class="btn btn-default btn-block" style="margin-top: 5px;" ng-click="showHeadingModal(current.currentPage, {heading_name:'', heading_id:0})">Add Page Section</button>
+    <p ng-show="user.word_count>0" style="margin-top: 8px;">Contribution = {{user.word_count}} words</p>
+</div>
+
+<div class="col-sm-8 col-md-9 col-lg-9" ng-show="current.currentPage.page_id!=0">
+    <h3 id="page-top">{{current.currentPage.page_name}}</h3>
+    <div ng-repeat="heading in wiki.headings | filter:{page_id:current.currentPage.page_id}">
+        <h4 class="wiki-heading" id="sect_{{current.currentPage.page_id + '_' + heading.heading_id}}" ng-bind-html="heading.heading_name"></h4>
+        <div ng-repeat="post in current.posts | filter:{heading_id:heading.heading_id}:true">
+            <div class="post-block">
+                <div ng-repeat="v in post.versions | filter:{version:post.version}:true">
+                    <div class="pull-right" ng-show="v.is_new" tooltip="New post" style="color:darkorange;"><i class="fa fa-star"></i></div>
+                    <div dynamic="v.post_txt" id="p_{{v.post_id}}"></div>
+                    <div class="text-muted user-name"><span class="badge show-cursor" tooltip="Like this post" ng-class="setBadgeColor(post)" ng-show="wiki.use_likes" ng-click="likePost(post)">{{post.likes}}</span> <span ng-show="post.versions.length===1">{{v.user_name}},</span> <select class="wiki-select" ng-hide="post.versions.length===1" ng-model="post.version" ng-options="ver.version as ver.label for ver in post.versions"></select> {{v.edit_date | date:"MMM dd, ''''yy hh:mm a"}}<span ng-show="user.priv_level>1 && v.is_anon=='1'"><sup> ANON</sup></span>
+                        <button ng-show="user.user_id==v.creator_id || user.priv_level>1 || wiki.use_versions" class="btn btn-link" ng-click="showPostModal(heading, post, v)"><i class="fa fa-edit"></i> Edit</button>
+                        <button ng-show="wiki.use_comments" class="btn btn-link" ng-click="showCommentModal(heading, post, {comment_txt:'', anon_comment:'0'})"><i class="fa fa-comment-o"></i> Comment</button>
+                        <button ng-show="user.user_id==v.creator_id || user.priv_level>1" class="btn btn-link pull-right" ng-click="deletePost(v, post)"><i class="fa fa-trash-o"></i></button>
+                    </div>
+                </div>
+                <div ng-repeat="c in post.comments" class="post-comment">
+                    <div class="pull-right" ng-show="c.is_new_comment" tooltip="New comment" style="color:green;"><i class="fa fa-star"></i></div>
+                    <div ng-bind-html="c.comment_txt" id="c_{{c.comment_id}}"></div>
+                    <div class="text-muted comment-src">{{c.commentor}}, {{c.comment_date | date:"MMM dd, ''''yy hh:mm a"}}<span ng-show="user.priv_level>1 && c.anon_comment=='1'"><sup> ANON</sup></span>
+                        <button ng-show="user.user_id==c.user_id || user.priv_level>1" class="btn btn-link" ng-click="showCommentModal(heading, post, c)"><i class="fa fa-edit"></i> Edit</button>
+                        <button ng-show="user.user_id==c.user_id || user.priv_level>1" class="btn btn-link pull-right" ng-click="deleteComment(c, post)"><i class="fa fa-trash-o"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a href ng-show="wiki.max_posts===0 || heading.num_posts<wiki.max_posts" ng-click="showPostModal(heading, {versions:[]}, {is_new:true, is_anon:'0'})"><i class="fa fa-plus"></i> Add to {{heading.heading_name}}</a>
+        <hr ng-show="wiki.max_posts===0 || heading.num_posts<wiki.max_posts">
+    </div>
+</div>
+
+<script type="text/ng-template" id="postModal.html">
+    <div class="modal-header">
+        <button class="btn btn-warning pull-right" ng-click="cancel()">Cancel</button>
+        <h3>{{heading.heading_name}}</h3>
+    </div>
+    <div class="modal-body">
+        <textarea id="wiki-postTxt" style="width:100%"></textarea>
+    </div>
+    <div class="modal-footer">
+        <div dropdown>
+            <button type="button" class="btn btn-default pull-left dropdown-toggle" dropdown-toggle
+                    style="margin-right: 5px;">
+                Pages <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu page-menu" role="menu">
+                <li ng-repeat="page in pages" class="show-cursor" ng-click="insertPageLink(page)">
+                    <a>{{page.page_name}}</a>
+                </li>
+            </ul>
+        </div>
+
+        <div dropdown>
+            <button type="button" class="btn btn-default pull-left dropdown-toggle" dropdown-toggle
+                    style="margin-right: 5px;">
+                Sections <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu section-menu" role="menu">
+                <li ng-repeat="heading in headings" class="show-cursor" ng-click="insertSectionLink(heading)">
+                    <a>{{heading.heading_name}}</a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="db-bar pull-left">
+            <div style="display: inline-block" flow-init="flow.flow_config"
+                 flow-files-submitted="$flow.upload()"
+                 flow-complete="flow.uploadComplete('img')"
+                 flow-file-added="flow.addedUpload($file, $event)">
+                            <span class="btn btn-success" flow-btn="" ng-click="flow.initFlowQuery(heading.heading_id, '2')"><i class="fa fa-upload"></i> Image
+                                <input type="file" style="visibility: hidden; position: absolute;">
+                            </span>
+            </div>
+            <div style="display: inline-block" flow-init="flow.flow_config"
+                 flow-files-submitted="$flow.upload()"
+                 flow-object="existingFlowObject"
+                 flow-complete="flow.uploadComplete('video')"
+                 flow-file-added="flow.addedUpload($file, $event)">
+                            <span class="btn btn-success" flow-btn="" ng-click="flow.initFlowQuery(heading.heading_id, '1')"><i class="fa fa-upload"></i> Video
+                                <input type="file" style="visibility: hidden; position: absolute;">
+                            </span>
+            </div>
+
+            <div style="display: inline-block" flow-init="flow.flow_config"
+                 flow-files-submitted="$flow.upload()"
+                 flow-object="existingFlowObject"
+                 flow-complete="flow.uploadComplete('file')"
+                 flow-file-added="flow.addedUpload($file, $event)">
+                            <span class="btn btn-success" flow-btn="" ng-click="flow.initFlowQuery(heading.heading_id, '3')"><i class="fa fa-upload"></i> File
+                                <input type="file" style="visibility: hidden; position: absolute;">
+                            </span>
+            </div>
+        </div>
+        <button class="btn btn-default" ng-show="user.priv_level>1" style="margin-right:5px;" ng-click="insertMicro(post)" tooltip="Insert link for adding micro posts"><i class="fa fa-anchor"></i></button>
+        <button class="btn btn-default" ng-show="user.priv_level>1" style="margin-right:5px;" ng-click="submitPost(true)" tooltip="Submit post as Previous Student"><i class="fa fa-user"></i></button>
+        <label ng-show="wiki.use_anon" for="is_anon_cb" style="margin-right: 10px;"><input id="is_anon_cb" type="checkbox" ng-model="version.is_anon" ng-true-value="'1'" ng-false-value="'0'"> Anonymous</label>
+        <label ng-show="post.post_id && (user.priv_level>1 || user.user_id==post.creator_id) && wiki.use_versions" for="new_version_cb" style="margin-right: 10px;"><input id="new_version_cb" type="checkbox" ng-model="new_version"> New Version</label>
+        <button class="btn btn-primary" ng-click="submitPost(false)">Submit</button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="commentModal.html">
+    <div class="modal-header">
+        <button class="btn btn-warning pull-right" ng-click="cancel()">Cancel</button>
+        <h3>Comment</h3>
+    </div>
+    <div class="modal-body">
+        <textarea id="wiki-commentTxt" style="width:100%"></textarea>
+    </div>
+    <div class="modal-footer">
+        <div dropdown>
+            <button type="button" class="btn btn-default pull-left dropdown-toggle" dropdown-toggle
+                    style="margin-right: 5px;">
+                Pages <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu page-menu" role="menu">
+                <li ng-repeat="page in pages" class="show-cursor" ng-click="insertPageLink(page)">
+                    <a>{{page.page_name}}</a>
+                </li>
+            </ul>
+        </div>
+
+        <div dropdown>
+            <button type="button" class="btn btn-default pull-left dropdown-toggle" dropdown-toggle
+                    style="margin-right: 5px;">
+                Sections <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu section-menu" role="menu">
+                <li ng-repeat="heading in headings" class="show-cursor" ng-click="insertSectionLink(heading)">
+                    <a>{{heading.heading_name}}</a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="db-bar pull-left">
+            <div style="display: inline-block" flow-init="flow.flow_config"
+                 flow-files-submitted="$flow.upload()"
+                 flow-complete="flow.uploadComplete('img')"
+                 flow-file-added="flow.addedUpload($file, $event)">
+                            <span class="btn btn-success" flow-btn="" ng-click="flow.initFlowQuery(heading.heading_id, '2')"><i class="fa fa-upload"></i> Image
+                                <input type="file" style="visibility: hidden; position: absolute;">
+                            </span>
+            </div>
+            <div style="display: inline-block" flow-init="flow.flow_config"
+                 flow-files-submitted="$flow.upload()"
+                 flow-object="existingFlowObject"
+                 flow-complete="flow.uploadComplete('video')"
+                 flow-file-added="flow.addedUpload($file, $event)">
+                            <span class="btn btn-success" flow-btn="" ng-click="flow.initFlowQuery(heading.heading_id, '1')"><i class="fa fa-upload"></i> Video
+                                <input type="file" style="visibility: hidden; position: absolute;">
+                            </span>
+            </div>
+
+            <div style="display: inline-block" flow-init="flow.flow_config"
+                 flow-files-submitted="$flow.upload()"
+                 flow-object="existingFlowObject"
+                 flow-complete="flow.uploadComplete('file')"
+                 flow-file-added="flow.addedUpload($file, $event)">
+                            <span class="btn btn-success" flow-btn="" ng-click="flow.initFlowQuery(heading.heading_id, '3')"><i class="fa fa-upload"></i> File
+                                <input type="file" style="visibility: hidden; position: absolute;">
+                            </span>
+            </div>
+        </div>
+        <label ng-show="wiki.use_anon" for="is_anon_comment" style="margin-right: 10px;"><input id="is_anon_comment" type="checkbox" ng-model="post_comment.anon_comment" ng-true-value="'1'" ng-false-value="'0'"> Anonymous</label>
+        <button class="btn btn-primary" ng-click="submitComment(post_comment)">Submit</button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="microModal.html">
+    <div class="modal-header">
+        <button class="btn btn-warning pull-right" ng-click="cancel()">Cancel</button>
+        <h3>Micro Post</h3>
+    </div>
+    <div class="modal-body">
+        <textarea id="wiki-microTxt" style="width:100%"></textarea>
+    </div>
+    <div class="modal-footer">
+        <div dropdown>
+            <button type="button" class="btn btn-default pull-left dropdown-toggle" dropdown-toggle
+                    style="margin-right: 5px;">
+                Pages <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu page-menu" role="menu">
+                <li ng-repeat="page in pages" class="show-cursor" ng-click="insertPageLink(page)">
+                    <a>{{page.page_name}}</a>
+                </li>
+            </ul>
+        </div>
+
+        <div dropdown>
+            <button type="button" class="btn btn-default pull-left dropdown-toggle" dropdown-toggle
+                    style="margin-right: 5px;">
+                Sections <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu section-menu" role="menu">
+                <li ng-repeat="heading in headings" class="show-cursor" ng-click="insertSectionLink(heading)">
+                    <a>{{heading.heading_name}}</a>
+                </li>
+            </ul>
+        </div>
+        <div class="db-bar pull-left">
+            <div style="display: inline-block" flow-init="flow.flow_config"
+                 flow-files-submitted="$flow.upload()"
+                 flow-complete="flow.uploadComplete('img')"
+                 flow-file-added="flow.addedUpload($file, $event)">
+                            <span class="btn btn-success" flow-btn="" ng-click="flow.initFlowQuery(heading.heading_id, '2')"><i class="fa fa-upload"></i> Image
+                                <input type="file" style="visibility: hidden; position: absolute;">
+                            </span>
+            </div>
+            <div style="display: inline-block" flow-init="flow.flow_config"
+                 flow-files-submitted="$flow.upload()"
+                 flow-object="existingFlowObject"
+                 flow-complete="flow.uploadComplete('video')"
+                 flow-file-added="flow.addedUpload($file, $event)">
+                            <span class="btn btn-success" flow-btn="" ng-click="flow.initFlowQuery(heading.heading_id, '1')"><i class="fa fa-upload"></i> Video
+                                <input type="file" style="visibility: hidden; position: absolute;">
+                            </span>
+            </div>
+
+            <div style="display: inline-block" flow-init="flow.flow_config"
+                 flow-files-submitted="$flow.upload()"
+                 flow-object="existingFlowObject"
+                 flow-complete="flow.uploadComplete('file')"
+                 flow-file-added="flow.addedUpload($file, $event)">
+                            <span class="btn btn-success" flow-btn="" ng-click="flow.initFlowQuery(heading.heading_id, '3')"><i class="fa fa-upload"></i> File
+                                <input type="file" style="visibility: hidden; position: absolute;">
+                            </span>
+            </div>
+        </div>
+        <label ng-show="wiki.use_anon" for="is_anon_micro" style="margin-right: 10px;"><input id="is_anon_micro" type="checkbox" ng-model="micro.is_anon" ng-true-value="'1'" ng-false-value="'0'"> Anonymous</label>
+        <button class="btn btn-primary" ng-click="submitMicro(micro)">Submit</button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="headingModal.html">
+    <div class="modal-header">
+        <h3>{{page.page_name}}</h3>
+    </div>
+    <div class="modal-body">
+        <label>Section <input type="text" id="headingInput" class="form-control" ng-model="heading.heading_name" style="width:460px; display:inline-block;" autofocus></label>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="submitHeading()">Submit</button>
+        <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+    </div>
+</script>
+
+<script type="text/ng-template" id="pageModal.html">
+    <div class="modal-header">
+        <h3>Add Page</h3>
+    </div>
+    <div class="modal-body">
+        <label>Page <input type="text" class="form-control" id="pageInput" ng-model="page.page_name" style="width:460px; display:inline-block;" autofocus></label>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="submitPage()">Submit</button>
+        <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+    </div>
+</script>
